@@ -18,7 +18,7 @@ const App = () => {
                 if (permission === "granted") {
                     Geolocation.getCurrentPosition(
                         (position) => {
-                            MessageRouter._sendMessageToWebview(MessageTypes.gps, MessageTopics.location_update, webviewRef, position);
+                            MessageRouter.sendMessageToWebview(MessageTypes.gps, MessageTopics.location_update, webviewRef, position);
                         },
                         (error) => {
                             console.error(error.code, error.message);
