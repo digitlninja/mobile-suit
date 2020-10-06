@@ -1,11 +1,9 @@
+import { topicsToNotSendToWebview } from "../constants";
+
 let subscriptions = {};
 
-const _getUniqueId = () => {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36);
-};
-
-const _getMessageObject = (type, topic, payload) => ({
-    request_id: _getUniqueId(),
+const _getMessageObject = (id, type, topic, payload) => ({
+    id: id || "",
     source: "react_native",
     destination: "webview",
     type: type || "",
@@ -13,37 +11,44 @@ const _getMessageObject = (type, topic, payload) => ({
     payload: payload || {}
 });
 
-// receive message: gets request and routes to sendMessage
+// receives message: gets request and routes to sendMessage
 export const router = (event, webviewRef) => {
-    console.log("message received from webview", { event, webviewRef });
+    console.log("Message received from webview.", { event, webviewRef });
     let messageData = {};
     try {
         if (!event && event.nativeEvent && event.nativeEvent.data) {
             throw new Error("router(): Invalid event.");
         }
         messageData = JSON.parse(event.nativeEvent.data);
-        console.log("Parsed event data", messageData);
-        publish(messageData, webviewRef).then(() => console.log("Router sent data for publishing."));
+        console.log("Parsed event data.", messageData);
+        publish(messageData, webviewRef.current).then(() => console.log("Router sent data for publishing."));
     } catch (error) {
-        console.error("React Native Message router() error:,", { error });
-        sendMessageToWebview(`${messageData.type}_error`, messageData.topic, webviewRef, error);
+        console.error("Message router() error:,", { error });
+        sendMessageToWebview(messageData.id, `${messageData.type}_error`, messageData.topic, webviewRef.current, error);
     }
 };
 
-export const sendMessageToWebview = (type, topic, webviewRef, payload) => {
-    const message = _getMessageObject(type, topic, payload);
-    const messageDispatcher = `(function(){
+export const sendMessageToWebview = (id, type, topic, webviewRef, payload) => {
+    if (!id || !type || !topic || !webviewRef || !payload) {
+        throw Error(`sendMessageToWebview() error: invalid args.`);
+    }
+    try {
+        const message = _getMessageObject(id, type, topic, payload);
+        const messageDispatcher = `(function(){
                 window.dispatchEvent(new MessageEvent('message', {data: ${JSON.stringify(message)}}));
                 })();
                 true;
             `;
-    webviewRef.injectJavaScript(messageDispatcher);
-    console.log("Message sent to Webview.");
+        webviewRef.injectJavaScript(messageDispatcher);
+        console.log("Message sent to Webview.");
 
+    } catch (error) {
+        console.error("sendMessageToWebview() error", error);
+    }
 };
 
 export const subscribe = (type = "", topic = "", callback = {}) => {
-    console.log("Received subscription", { type, topic, callback });
+    console.log("Received subscription.", { type, topic });
     const id = Symbol("id");
     if (!subscriptions[type]) {
         subscriptions[type] = {};
@@ -55,7 +60,6 @@ export const subscribe = (type = "", topic = "", callback = {}) => {
         subscriptions[type][topic][id] = callback;
         console.log(`Subscribed to ${type}:${topic} subscription successfully.`, { subscriptions });
     }
-
     return {
         unsubscribe: () => {
             delete subscriptions[type][topic][id];
@@ -72,27 +76,32 @@ export const subscribe = (type = "", topic = "", callback = {}) => {
 
 export const publish = async (messageData, webviewRef) => {
     if (!messageData) {
-        console.log(`No messageData arg found`);
+        throw Error(`publish() error: No messageData arg found.`);
     }
-    const { type, topic, payload } = messageData || {};
+    if (!webviewRef) {
+        throw Error(`publish() error: No webviewRef arg found.`);
+    }
+    const { id, type, topic, payload } = messageData;
     try {
         if (!subscriptions[type]) {
-            console.log(`No subscription found for ${type}`);
+            console.log(`No subscription found for ${type}.`);
             return;
         }
         if (!subscriptions[type][topic] || subscriptions[type][topic].length < 1) {
-            console.log(`No subscription found for ${type}:${topic}`);
+            console.log(`No subscription found for ${type}:${topic}.`);
             return;
         }
         const subscriptionFunctions = Object.getOwnPropertySymbols(subscriptions[type][topic]);
         for (const key of subscriptionFunctions) {
             const subscriptionFunction = subscriptions[type][topic][key];
             const subscriptionResult = await subscriptionFunction(!!payload ? payload : {});
-            sendMessageToWebview(type, topic, webviewRef, subscriptionResult);
+            if (!topicsToNotSendToWebview.includes(topic)) {
+                sendMessageToWebview(id, type, topic, webviewRef, subscriptionResult);
+            }
             console.log(`Message Router - publish(): Event published successfully.`, { subscriptionResult });
         }
     } catch (error) {
         console.error("Message Router - publish() Error:", { error });
-        sendMessageToWebview(`${type}_error`, topic, webviewRef, error);
+        sendMessageToWebview(id, `${type}_error`, topic, webviewRef, { message: error.message });
     }
 };
