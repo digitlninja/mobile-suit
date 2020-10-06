@@ -1,12 +1,11 @@
 import { PermissionsAndroid, Platform } from "react-native";
 import Geolocation from "react-native-geolocation-service";
-import * as MessageRouter from "../WebviewPigeon";
+import * as WebviewPigeon from "../webview-pigeon";
 import { MessageTopics, MessageTypes } from "../constants";
 
 const _getCurrentPositionPromisified = () => new Promise((resolve, reject) => {
     Geolocation.getCurrentPosition(
         (position) => {
-            console.log("in _getCurrentPositionPromisified.getCurrentPosition", { position });
             resolve(position);
         },
         (error) => {
@@ -51,5 +50,5 @@ export const getLocation = async () => {
 };
 
 export const initialize = () => {
-    MessageRouter.subscribe(MessageTypes.gps, MessageTopics.location_update, getLocation);
+    WebviewPigeon.subscribe(MessageTypes.gps, MessageTopics.location_update, getLocation);
 };

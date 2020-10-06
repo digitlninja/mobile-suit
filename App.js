@@ -1,13 +1,37 @@
-import React, { useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { Button, PermissionsAndroid, Platform } from "react-native";
 import { WebView } from "react-native-webview";
 import Geolocation from "react-native-geolocation-service";
-import * as MessageRouter from "./WebviewPigeon";
+import * as MessageRouter from "./webview-pigeon";
 import { MessageTopics, MessageTypes } from "./constants";
+import BarcodeScanScreen from "./components/BarcodeScanner";
+import Store, { Context } from "./store/Store";
+import * as BarcodeScannerAdapter from "./adapters/BarcodeScannerAdapter";
+import { getUUID } from "./helpers";
+
+const AppContainer = () => {
+    return (
+        <Store>
+            <App/>
+        </Store>
+    );
+};
 
 const App = () => {
+    // eslint-disable-next-line
+    const [globalState, dispatch, enableBarcodeScanner] = useContext(Context);
+    let webviewRef = useRef();
 
-    let webviewRef = useRef(null);
+    const showBarcodeScanner = async () => {
+        const cameraAllowed = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA);
+        if (cameraAllowed) {
+            enableBarcodeScanner();
+        }
+    };
+
+    useEffect(() => {
+        BarcodeScannerAdapter.initialize(showBarcodeScanner);
+    }, []);
 
     const publishLocation = async () => {
         if (Platform.OS === "android") {
@@ -18,7 +42,8 @@ const App = () => {
                 if (permission === "granted") {
                     Geolocation.getCurrentPosition(
                         (position) => {
-                            MessageRouter.sendMessageToWebview(MessageTypes.gps, MessageTopics.location_update, webviewRef, position);
+                            const id = getUUID();
+                            MessageRouter.sendMessageToWebview(id, MessageTypes.gps, MessageTopics.location_update, webviewRef.current, position);
                         },
                         (error) => {
                             console.error(error.code, error.message);
@@ -49,8 +74,10 @@ const App = () => {
     return (
         <>
             <Button onPress={publishLocation} title="Get Location"/>
+            {globalState.showBarcodeScanner &&
+            <BarcodeScanScreen webviewRef={webviewRef}/>}
             <WebView
-                ref={webview => webviewRef = webview}
+                ref={webview => webviewRef.current = webview}
                 source={{ uri: "http://localhost:3000" }}
                 style={{ marginTop: 20 }}
                 onMessage={(event) => MessageRouter.router(event, webviewRef)}
@@ -59,5 +86,5 @@ const App = () => {
     );
 };
 
-export default App;
+export default AppContainer;
 
