@@ -37,10 +37,22 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<key>NSLocationAlwaysUsageDescription</key>
+	<key>NSCameraUsageDescription</key>
+	<string>Your message to user when the camera is accessed for the first time</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string></string>
+	<string>IoT</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>IoT</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>IoT requires user’s location for better user experience.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Your message to user when the microphone is accessed for the first time</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Your message to user when the photo library is accessed for the first time</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -55,15 +67,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSCameraUsageDescription</key>
-    <string>Your message to user when the camera is accessed for the first time</string>
-
-    <!-- Include this only if you are planning to use the camera roll -->
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>Your message to user when the photo library is accessed for the first time</string>
-
-    <!-- Include this only if you are planning to use the microphone for video recording -->
-    <key>NSMicrophoneUsageDescription</key>
-    <string>Your message to user when the microsphone is accessed for the first time</string>
 </dict>
 </plist>

@@ -29,8 +29,8 @@ export const router = (event, webviewRef) => {
 };
 
 export const sendMessageToWebview = (id, type, topic, webviewRef, payload) => {
-    if (!id || !type || !topic || !webviewRef || !payload) {
-        throw Error(`sendMessageToWebview() error: invalid args.`);
+    if (!id || !type || !topic || !webviewRef) {
+        throw Error(`sendMessageToWebview() error: invalid args. id: ${id}, type: ${type}, topic: ${topic}, webviewRef: ${webviewRef}, payload: ${payload} }}`);
     }
     try {
         const message = _getMessageObject(id, type, topic, payload);
@@ -38,10 +38,9 @@ export const sendMessageToWebview = (id, type, topic, webviewRef, payload) => {
                 window.dispatchEvent(new MessageEvent('message', {data: ${JSON.stringify(message)}}));
                 })();
                 true;
-            `;
+        `;
         webviewRef.injectJavaScript(messageDispatcher);
         console.log("Message sent to Webview.");
-
     } catch (error) {
         console.error("sendMessageToWebview() error", error);
     }
