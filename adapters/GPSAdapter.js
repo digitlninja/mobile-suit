@@ -19,34 +19,32 @@ const _getCurrentPositionPromisified = () => new Promise((resolve, reject) => {
     );
 });
 
-const _getGPSPermissionStatus = async () => {
-    try {
-        if (Platform.OS === "android") {
-            return await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-            );
-        }
-        if (Platform.OS === "ios") {
-            const permissionStatus = await Geolocation.requestAuthorization();
-            Geolocation.setRNConfiguration({
-                skipPermissionRequests: false,
-                authorizationLevel: "whenInUse",
-            });
-            return permissionStatus;
-        }
-    } catch (error) {
-        console.error("Error: _getGPSPermissionStatus()", { error });
-        throw error;
+const _getPermissionStatus = async (type) => {
+    if (Platform.OS === "android") {
+        return await PermissionsAndroid.request(type);
     }
+    const permissionStatus = await Geolocation.requestAuthorization("always");
+    Geolocation.setRNConfiguration({
+        skipPermissionRequests: false,
+        authorizationLevel: "always",
+    });
+    return permissionStatus;
 };
 
 export const getLocation = async () => {
-    let permissionStatus = await _getGPSPermissionStatus();
-    if (permissionStatus !== "granted") {
-        throw new Error("Location permission denied");
+    try {
+        const permission = await _getPermissionStatus(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
+        if (permission !== "granted") {
+            console.error("Permission not granted");
+            alert("Please ensure Location permissions are allowed for this app.");
+            return;
+        }
+        const position = await _getCurrentPositionPromisified();
+        return position;
+    } catch (error) {
+        console.error({ error });
+        alert("getLocation() error:", error);
     }
-    const position = await _getCurrentPositionPromisified();
-    return position;
 };
 
 export const initialize = () => {
