@@ -25,6 +25,7 @@ const getNetwork = async () => {
         return SSID;
     } catch (error) {
         console.log("Cannot get current SSID!", error);
+        throw error;
     }
 };
 
@@ -49,6 +50,7 @@ const connectToNetwork = async ({ SSID = "Sirocco", password = "123@Sir@2020", i
         }
         console.error("Connection failed!", error);
         alert("Please turn your WiFi on and try again.");
+        throw error;
     }
 };
 
@@ -64,6 +66,7 @@ const listNetworks = async () => {
         return (await WifiManager.loadWifiList()).map(({ SSID }) => SSID);
     } catch (error) {
         console.log("Connection failed!");
+        throw error;
     }
 };
 
@@ -84,7 +87,7 @@ const disconnectFromNetwork = async () => {
         }
     } catch (error) {
         console.log("Error", error);
-
+        throw error;
     }
 };
 

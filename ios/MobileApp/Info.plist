@@ -25,6 +25,8 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
+	<key>NSFaceIDUsageDescription</key>
+    <string>$(PRODUCT_NAME) requires FaceID access to allows you quick and secure access.</string>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
