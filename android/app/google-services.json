@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "727752440175",
+    "firebase_url": "https://iotwrapper.firebaseio.com",
+    "project_id": "iotwrapper",
+    "storage_bucket": "iotwrapper.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:727752440175:android:d71fd251747acb5bbd109a",
+        "android_client_info": {
+          "package_name": "com.mobileapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "727752440175-lbnrbrgg54ome4g0alkn6vj2p1io86b0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOf_bkVvEc68D1bInaXdyFlTuQORmkYmQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "727752440175-lbnrbrgg54ome4g0alkn6vj2p1io86b0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
