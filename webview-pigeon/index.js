@@ -97,7 +97,10 @@ export const publish = async (messageData, webviewRef) => {
             if (!topicsToNotSendToWebview.includes(topic)) {
                 sendMessageToWebview(id, type, topic, webviewRef, subscriptionResult);
             }
-            console.log(`Message Router - publish(): Event published successfully.`, { subscriptionResult });
+            console.log(`Message Router - publish(): Event published successfully.`, {
+                subscriptionFunction,
+                subscriptionResult
+            });
         }
     } catch (error) {
         console.error("Message Router - publish() Error:", { error });

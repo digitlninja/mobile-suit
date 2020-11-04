@@ -8,9 +8,11 @@ import BarcodeScanScreen from "./components/BarcodeScanner";
 import Store, { Context } from "./store/Store";
 import { getUUID } from "./helpers";
 import * as BarcodeScannerAdapter from "./adapters/BarcodeScannerAdapter";
+import * as BiometricsAdapter from "./adapters/BiometricsAdapter";
 import * as MessageRouter from "./webview-pigeon";
 import * as WiFiAdapter from "./adapters/WiFiAdapter";
 import messaging from "@react-native-firebase/messaging";
+import BiometricPopup from "./components/BiotmetricPopup/BiometricPopup";
 
 const AppContainer = () => (
     <Store>
@@ -20,11 +22,12 @@ const AppContainer = () => (
 
 const App = () => {
     // eslint-disable-next-line
-    const [globalState, dispatch, enableBarcodeScanner] = useContext(Context);
+    const [globalState, dispatch, enableBarcodeScanner, disableBarcodeScanner, enableBiometricScanner] = useContext(Context);
     let webviewRef = useRef();
 
     useEffect(() => {
         BarcodeScannerAdapter.initialize(showBarcodeScanner);
+        BiometricsAdapter.initialize(enableBiometricScanner);
         WiFiAdapter.initialize();
         const unsubscribeToFirebase = messaging().onMessage(async remoteMessage => {
             Alert.alert("A new FCM message arrived!", JSON.stringify(remoteMessage));
@@ -167,7 +170,6 @@ const App = () => {
             console.error({ error });
         }
     };
-
     return (
         <>
             <Button onPress={() => publishLocation()} title="Get Location"/>
@@ -176,9 +178,12 @@ const App = () => {
             <Button onPress={() => connectToNetwork()} title="Connect to network"/>
             <Button onPress={() => listNetworks()} title="List networks"/>
             <Button onPress={() => disconnectFromNetwork()} title="Disconnect"/>
-
-            {globalState.showBarcodeScanner &&
-            <BarcodeScanScreen webviewRef={webviewRef}/>}
+            {globalState.showBiometricScanner &&
+            <BiometricPopup
+                onAuthenticate={() => console.log("Auth'd")}
+                webviewRef={webviewRef}/>
+            }
+            {globalState.showBarcodeScanner && <BarcodeScanScreen webviewRef={webviewRef}/>}
             <WebView
                 ref={webview => webviewRef.current = webview}
                 source={{ uri: "http://localhost:8080" }}
