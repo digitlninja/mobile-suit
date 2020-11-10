@@ -9,28 +9,34 @@ Built with React Native
 Follow the steps in this walkthrough:
 https://app.tettra.co/teams/threesprints/pages/setup
 
+Install javascript packages.
+
+```
+$ npm install
+```
+
 Install ios packages.
 
 ```
-$ cd ios && pod install
+$ cd ios && pod install && cd ..
 ```
 
 ## Running the app
 
-####Run the web app and api first
+(Run the web app and api first)
 
-####IOS
+IOS
 ```
 $ npm run ios
 ```
-####Android
+Android
 ```
 $ npm run android
 ```
 
 ## Debugging
 
-####ReactNative
+ReactNative
 If you want to enable debugging ReactNative in the browser for android: (if its not there)
 
 ```
@@ -49,7 +55,8 @@ import android.webkit.WebView;
     http://localhost:8081/debugger-ui/
     
     If you want to debug from console instead, remove the above snippet._
-####Webview
+
+Webview
 
 Navigate to the url below in Chrome. Click inspect on the running app. (This is for debugging Webview code.)
 
