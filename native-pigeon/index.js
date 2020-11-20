@@ -11,7 +11,6 @@ const _getMessageObject = (type, topic, payload) => ({
     type: type || "",
     topic: topic || "",
     payload: payload || {}
-
 });
 
 // receive message: gets request and routes to sendMessage
@@ -27,11 +26,11 @@ export const router = (event, webviewRef) => {
         publish(messageData, webviewRef).then(() => console.log("Router sent data for publishing."));
     } catch (error) {
         console.error("React Native Message router() error:,", { error });
-        _sendMessageToWebview(`${messageData.type}_error`, messageData.topic, webviewRef, error);
+        sendMessageToWebview(`${messageData.type}_error`, messageData.topic, webviewRef, error);
     }
 };
 
-export const _sendMessageToWebview = (type, topic, webviewRef, payload) => {
+export const sendMessageToWebview = (type, topic, webviewRef, payload) => {
     const message = _getMessageObject(type, topic, payload);
     const messageDispatcher = `(function(){
                 window.dispatchEvent(new MessageEvent('message', {data: ${JSON.stringify(message)}}));
@@ -39,6 +38,8 @@ export const _sendMessageToWebview = (type, topic, webviewRef, payload) => {
                 true;
             `;
     webviewRef.injectJavaScript(messageDispatcher);
+    console.log("Message sent to Webview.");
+
 };
 
 export const subscribe = (type = "", topic = "", callback = {}) => {
@@ -86,13 +87,12 @@ export const publish = async (messageData, webviewRef) => {
         const subscriptionFunctions = Object.getOwnPropertySymbols(subscriptions[type][topic]);
         for (const key of subscriptionFunctions) {
             const subscriptionFunction = subscriptions[type][topic][key];
-            console.log({ subscriptionFunction });
             const subscriptionResult = await subscriptionFunction(!!payload ? payload : {});
-            _sendMessageToWebview(type, topic, webviewRef, subscriptionResult);
+            sendMessageToWebview(type, topic, webviewRef, subscriptionResult);
             console.log(`Message Router - publish(): Event published successfully.`, { subscriptionResult });
         }
     } catch (error) {
         console.error("Message Router - publish() Error:", { error });
-        _sendMessageToWebview(`${type}_error`, topic, webviewRef, error);
+        sendMessageToWebview(`${type}_error`, topic, webviewRef, error);
     }
 };

@@ -32,6 +32,14 @@
             </intent-filter>
         </activity>
         <activity android:name="com.facebook.react.devsupport.DevSettingsActivity"/>
+        <!-- react-native-background-geolocation licence -->
+        <meta-data android:name="com.mobileapp"
+                   android:value="b70ba91b4d13da13c0f047608c51565fd4f0600432ef3a0b6075e38f127ee6e6"/>
+        <service android:name="com.transistorsoft.locationmanager.service.TrackingService"
+                 android:foregroundServiceType="location"/>
+        <service android:name="com.transistorsoft.locationmanager.service.LocationRequestService"
+                 android:foregroundServiceType="location"/>
+
     </application>
 
 </manifest>
