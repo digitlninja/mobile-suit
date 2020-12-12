@@ -13,7 +13,7 @@ import {
 import FingerprintScanner from "react-native-fingerprint-scanner";
 import styles from "./styles";
 import ShakingText from "./ShakingText";
-import { Context } from "../../store/Store";
+import { Context } from "../../store/store";
 import * as BiometricsAdapter from "../../adapters/BiometricsAdapter";
 import { v4 as uuidv4 } from "uuid";
 // import ShakingText from "./ShakingText.component";

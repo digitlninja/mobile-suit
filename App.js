@@ -1,13 +1,26 @@
 import React, { useEffect, useRef } from 'react';
-import { Button, PermissionsAndroid, Platform } from 'react-native';
+import { Button } from 'react-native';
 import { WebView } from 'react-native-webview';
-import Geolocation from 'react-native-geolocation-service';
 import * as NativePigeon from './native-pigeon';
-import { MessageTopics, MessageTypes } from './constants';
 import BackgroundGeolocation from 'react-native-background-geolocation';
-import * as GeolocationAdapter from './adapters/GPSAdapter';
+import * as GPSAdapter from './adapters/GPSAdapter';
+import * as CameraAdapter from './adapters/CameraAdapter';
+import CameraScreen from './components/CameraScreen';
+import { Context } from './store/store.js';
+import Store from './store/store';
+
+import { useContext } from 'react';
+import * as FileSystemAdapter from './adapters/FileSystemAdapter';
+
+const AppContainer = () => (
+    <Store>
+        <App/>
+    </Store>
+);
 
 const App = () => {
+    const [globalState, dispatch, enableCamera, disableCamera] = useContext(Context);
+
     const onLocation = (location) => {
         console.log('[location] -', location);
     };
@@ -24,8 +37,10 @@ const App = () => {
         console.log('[motionchange] -', event.isMoving, event.location);
     };
 
-    const initializeGeoLocation = async () => {
-        await GeolocationAdapter.initialize();
+    const initializeAdapters = async () => {
+        await GPSAdapter.initialize();
+        await CameraAdapter.initialize((photoData) => enableCamera(photoData));
+        await FileSystemAdapter.initialize();
     };
 
     const initializeBgGeo = () => {
@@ -40,7 +55,7 @@ const App = () => {
             // Activity Recognition
             stopTimeout: 1,
             // Application config
-            debug: true, // <-- enable this hear sounds for background-geolocation life-cycle.
+            debug: false, // <-- enable this hear sounds for background-geolocation life-cycle.
             logLevel: BackgroundGeolocation.LOG_LEVEL_VERBOSE,
             stopOnTerminate: false,   // <-- Allow the background-service to continue tracking when user closes the app.
             startOnBoot: true,        // <-- Auto start tracking when device is powered-up.
@@ -66,48 +81,11 @@ const App = () => {
 
     useEffect(() => {
         initializeBgGeo();
-        initializeGeoLocation();
+        initializeAdapters();
         return () => BackgroundGeolocation.removeListeners();
     }, []);
 
-    let webviewRef = useRef(null);
-
-    const publishLocation = async () => {
-        if (Platform.OS === 'android') {
-            try {
-                const permission = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-                );
-                if (permission === 'granted') {
-                    Geolocation.getCurrentPosition(
-                        (position) => {
-                            NativePigeon.sendMessageToWebview(MessageTypes.gps, MessageTopics.location_update, webviewRef, position);
-                        },
-                        (error) => {
-                            console.error(error.code, error.message);
-                        },
-                        {
-                            enableHighAccuracy: true,
-                            timeout: 10000,
-                            maximumAge: 10000
-                        }
-                    );
-                } else {
-                    console.log('Location permission denied');
-                }
-            } catch (error) {
-                console.error({ error });
-            }
-        }
-        if (Platform.OS === 'ios') {
-            const permissionStatus = await Geolocation.requestAuthorization();
-            Geolocation.setRNConfiguration({
-                skipPermissionRequests: false,
-                authorizationLevel: 'whenInUse',
-            });
-            return permissionStatus;
-        }
-    };
+    let webviewRef = useRef();
 
     const setTrackingState = () => BackgroundGeolocation.changePace(true, function () {
         console.log('- plugin is now tracking');
@@ -121,15 +99,20 @@ const App = () => {
         <>
             <Button onPress={setTrackingState} title="Tracking"/>
             <Button onPress={setStationaryState} title="Stationary"/>
+            <Button onPress={disableCamera} title="Close cam"/>
+            {globalState.showCamera &&
+            <CameraScreen webviewRef={webviewRef}/>
+            }
             <WebView
-                ref={webview => webviewRef = webview}
+                ref={webview => webviewRef.current = webview}
                 source={{ uri: 'http://localhost:8082' }}
                 style={{ marginTop: 20 }}
-                onMessage={(event) => NativePigeon.router(event, webviewRef)}
+                onMessage={(event) => NativePigeon.receiver(event, webviewRef)}
+                allowUniversalAccessFromFileURLs={true}
+                allowFileAccess={true}
             />
         </>
     );
 };
 
-export default App;
-
+export default AppContainer;

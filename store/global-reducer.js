@@ -1,31 +1,19 @@
 import {
-    ENABLE_BARCODE_SCANNER,
-    DISABLE_BARCODE_SCANNER,
-    ENABLE_BIOMETRIC_SCANNER,
-    DISABLE_BIOMETRIC_SCANNER
-} from "./types";
+    DISABLE_CAMERA, ENABLE_CAMERA
+} from './types';
 
 const GlobalReducer = (globalState, action) => {
     switch (action.type) {
-        case ENABLE_BARCODE_SCANNER:
+        case ENABLE_CAMERA:
             return {
                 ...globalState,
-                showBarcodeScanner: true
+                showCamera: true,
+                photoData: action.data && action.data.fileName ? { fileName: action.data.fileName } : {}
             };
-        case DISABLE_BARCODE_SCANNER:
+        case DISABLE_CAMERA:
             return {
                 ...globalState,
-                showBarcodeScanner: false
-            };
-        case ENABLE_BIOMETRIC_SCANNER:
-            return {
-                ...globalState,
-                showBiometricScanner: true
-            };
-        case DISABLE_BIOMETRIC_SCANNER:
-            return {
-                ...globalState,
-                showBiometricScanner: false
+                showCamera: false
             };
         default:
             return globalState;

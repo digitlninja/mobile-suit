@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import QRCodeScanner from "react-native-qrcode-scanner";
 import { RNCamera } from "react-native-camera";
-import { Context } from "../store/Store";
+import { Context } from "../store/store";
 import { getUUID } from "../helpers";
 import * as BarcodeScannerAdapter from "../adapters/BarcodeScannerAdapter";
 
